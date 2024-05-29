@@ -19,11 +19,10 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.assertj.core.api.Assertions.assertThat;
-
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -42,46 +41,42 @@ class ConsultaControllerTest {
     @MockBean
     private AgendaDeConsultas agendaDeConsultas;
 
-    ConsultaControllerTest() {
-    }
-
-
     @Test
-    @DisplayName("Deveria devolver código http 400 quando informações estão inválidas")
+    @DisplayName("Deveria devolver codigo http 400 quando informacoes estao invalidas")
     @WithMockUser
-    void agendarCenario1() throws Exception {
+    void agendar_cenario1() throws Exception {
         var response = mvc.perform(post("/consultas"))
-            .andReturn().getResponse();
+                .andReturn().getResponse();
 
         assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
     }
 
-
     @Test
-    @DisplayName("Deveria devolver código http 200 quando informações estão válidas")
+    @DisplayName("Deveria devolver codigo http 200 quando informacoes estao validas")
     @WithMockUser
-    void agendarCenario2() throws Exception {
-
-        // arrange
+    void agendar_cenario2() throws Exception {
         var data = LocalDateTime.now().plusHours(1);
         var especialidade = Especialidade.CARDIOLOGIA;
+
         var dadosDetalhamento = new DadosDetalhamentoConsulta(null, 2l, 5l, data);
         when(agendaDeConsultas.agendar(any())).thenReturn(dadosDetalhamento);
 
-        // act
         var response = mvc
                 .perform(
                         post("/consultas")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(dadosAgendamentoConsultaJson.write(
-                                        new DadosAgendamentoConsulta(2L, 5L, data, especialidade)
+                                        new DadosAgendamentoConsulta(2l, 5l, data, especialidade)
                                 ).getJson())
                 )
                 .andReturn().getResponse();
 
-        // assert
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
-        var jsonEsperado = dadosDetalhamentoConsultaJson.write(dadosDetalhamento).getJson();
+
+        var jsonEsperado = dadosDetalhamentoConsultaJson.write(
+                dadosDetalhamento
+        ).getJson();
+
         assertThat(response.getContentAsString()).isEqualTo(jsonEsperado);
     }
 
